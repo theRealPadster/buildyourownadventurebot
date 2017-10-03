@@ -4,8 +4,9 @@
   "description": "Code samples for the Unraveling Angular Material book",
   "dependencies": {
     "connect": "^3.4.0",
+    "express": "*",
+    "path": "*",
     "serve-static": "^1.10.0",
-    "express":"*",
-    "path":"*"
+    "twilio": "^3.7.0"
   }
 }
