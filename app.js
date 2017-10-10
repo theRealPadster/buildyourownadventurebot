@@ -26,7 +26,7 @@ function fLivingRoom_LightOrDoorway(req, res){
 
   //TODO - does this work?
   if (oConnections[sFrom].fBleedingStatus){
-    msg += "Your cut is worse than you thought, and it's starting to bleed more. "
+    msg += "Your cut is worse than you thought, and it's starting to bleed more. ";
   }
 
   if(sAction.toLowerCase().search("light") != -1){
