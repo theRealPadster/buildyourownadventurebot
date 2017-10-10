@@ -1,7 +1,10 @@
 {
-  "name": "UnravelingAngularMaterial",
+  "name": "buildyourownadventurebot",
   "version": "0.11.2",
-  "description": "Code samples for the Unraveling Angular Material book",
+  "description": "Simple chatbot game",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "connect": "^3.4.0",
     "express": "*",
