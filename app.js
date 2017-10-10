@@ -6,6 +6,15 @@ var bodyParser = require('body-parser');
 var twilio = require('twilio');
 var oConnections = {};
 
+var defaultState = {
+    "fCurState": fBeginning,
+    "isBleeding": false,
+    "hasRat": false,
+    "hasMushroom": false,
+    "hasSlime": false,
+    "hasAxe": false
+};
+
 // Define the port to run on
 app.set('port', process.env.PORT || parseInt(process.argv.pop()) || 5100);
 
@@ -24,7 +33,6 @@ function fLivingRoom_LightOrDoorway(req, res){
   var twiml = new twilio.twiml.MessagingResponse();
   var msg = "";
 
-  //TODO - does this work?
   if (oConnections[sFrom].fBleedingStatus){
     msg += "Your cut is worse than you thought, and it's starting to bleed more. ";
   }
@@ -54,7 +62,7 @@ function fOutside_WindowOrDoor(req, res){
     twiml.message("You pull yourself up, through the window, but cut yourself on the glass. It's not too deep, but it stings. The house is dark. You find yourself in a living room. Do you fumble around around looking for a light, or look for a doorway?");
     oConnections[sFrom].fBleedingStatus = true;
     oConnections[sFrom].fCurState = fLivingRoom_LightOrDoorway;
-  }else if(sAction.toLowerCase().search("door") != -1){  
+  }else if(sAction.toLowerCase().search("door") != -1){
     twiml.message("The door creaks loudly as you pull it open. You step inside. It is dark and the house smells of death. There is a door on your right. Take the door or go down the hall?");
     oConnections[sFrom].fCurState = fFrontDoor_HallOrDoor;
   }else {
@@ -76,10 +84,42 @@ function fBeginning(req, res){
 //define a method for the twilio webhook
 app.post('/sms', function(req, res) {
   var sFrom = req.body.From;
+  console.log("hit, sFrom:" + sFrom);
   if(!oConnections.hasOwnProperty(sFrom)){
     oConnections[sFrom] = {"fCurState":fBeginning};
   }
-  oConnections[sFrom].fCurState(req, res);
+
+  var sAction = req.body.Body;
+  var status = "";
+  if(sAction.toLowerCase().search("status") != -1){
+      status += "You have: \n"
+      if (oConnections[sFrom].hasRat) {
+          status += "- a dead rat\n";
+      }
+      if (oConnections[sFrom].hasSlime) {
+          status += "- some nasty slime\n";
+      }
+      if (oConnections[sFrom].hasMushroom) {
+          status += "- a moldy mushroom\n";
+      }
+      if (oConnections[sFrom].hasAxe) {
+          status += "- an axe\n";
+      }
+      if (oConnections[sFrom].isBleeding) {
+          status += "oh, and you're bleeding\n";
+      }
+
+      status += "Now just resume where you left off..."
+
+      var twiml = new twilio.twiml.MessagingResponse();
+      twiml.message(status);
+      res.writeHead(200, {'Content-Type': 'text/xml'});
+      res.end(twiml.toString());
+  }
+  else {
+      oConnections[sFrom].fCurState(req, res);
+  }
+
 });
 
 // Listen for requests
