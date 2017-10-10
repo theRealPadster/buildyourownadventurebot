@@ -7,9 +7,9 @@ var twilio = require('twilio');
 var oConnections = {};
 
 var defaultState = {
-    "fCurState": fBeginning,
+    // "fCurState": fBeginning,
     "isBleeding": false,
-    "hasRat": false,
+    "hasRat": true,
     "hasMushroom": false,
     "hasSlime": false,
     "hasAxe": false
@@ -86,7 +86,8 @@ app.post('/sms', function(req, res) {
   var sFrom = req.body.From;
   console.log("hit, sFrom:" + sFrom);
   if(!oConnections.hasOwnProperty(sFrom)){
-    oConnections[sFrom] = {"fCurState":fBeginning};
+    oConnections[sFrom] = JSON.parse(JSON.stringify(defaultState));
+    oConnections[sFrom].fCurState = fBeginning;
   }
 
   var sAction = req.body.Body;
