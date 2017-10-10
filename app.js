@@ -280,8 +280,8 @@ function fOutside(req, res) {
         oConnections[sFrom].fCurState = fLivingRoom;
     } //enter door
     else if (sAction.toLowerCase().search("door") != -1) {
-        msg = "The door creaks loudly as you pull it open. You step inside. It is dark and the house smells of death. There is a door on your right. Take the door or go down the hall?";
-        oConnections[sFrom].fCurState = fHall;
+        msg = "The door creaks loudly as you pull it open. You step inside. It is dark and the house smells of death. You're in the main hallway, and take a quick look around. There is a living room, a bedroom, a kitchen, and a dark staircase. Where do you go?";
+        oConnections[sFrom].fCurState = fHallEnd;
     } //first time here, or invalid
     else {
         msg = "You see a dark and scary abandoned house. There is a broken window on the right side, by the corner. The door is slightly ajar. Do you take the window or use front door?";
