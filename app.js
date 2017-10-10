@@ -133,7 +133,7 @@ app.post('/sms', function(req, res) {
     console.log("hit, sFrom:" + sFrom);
     if (!oConnections.hasOwnProperty(sFrom)) {
         oConnections[sFrom] = JSON.parse(JSON.stringify(defaultState));
-        oConnections[sFrom].fCurState = fBeginning;
+        oConnections[sFrom].fCurState = fOutside;
     }
 
     var sAction = req.body.Body;
