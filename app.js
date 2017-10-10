@@ -16,52 +16,49 @@ app.use(express.static(sPath));
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-function fPlay(req, res){
+// msg += "You hear a noise coming from deep within the house. "
+
+function fLivingRoom_LightOrDoorway(req, res){
   var sFrom = req.body.From;
   var sAction = req.body.Body;
   var twiml = new twilio.twiml.MessagingResponse();
-  if(sAction.toLowerCase().search("yes") != -1){
-    twiml.message("Oh glory. Here it is. I got it for you. Do you throw it again?");
-  }else if(sAction.toLowerCase().search("no") != -1){
-    twiml.message("Oh well. Wait .... Over there is that a stick or a fire hydrant?");
-    oConnections[sFrom].fCurState = fStickOrHydrant;
-  }else{
-    twiml.message("Wow! I've never seen you do " + sAction + " before. Wait .... Over there is that a stick or a fire hydrant?")
-    oConnections[sFrom].fCurState = fStickOrHydrant;    
+  var msg = "";
+
+  //TODO - does this work?
+  if (oConnections[sFrom].fBleedingStatus){
+    msg += "Your cut is worse than you thought, and it's starting to bleed more. "
   }
+
+  if(sAction.toLowerCase().search("light") != -1){
+    msg += "You trip on some debris, and run your hand along the wall. It feels...slimy. There is a light switch, but it stopped working years ago. ";
+    msg += "You find a candle and some matches. The room is illuminated in a bright flash as you light the candle. ";
+    msg += "The first thing you notice is all the dust everywhere. Then you see an axe, just sitting there on the coffee table. Do you take it?";
+    oConnections[sFrom].fCurState = fLivingRoom_LightOrDoorway;
+  }else if(sAction.toLowerCase().search("door") != -1){
+    msg += "You trip on some debris and stumble through the doorway. TODO - can I have a 'hall' function that's not hooked up to the window?";
+    // oConnections[sFrom].fCurState = fLivingRoom_LightOrDoorway;
+  }else{
+    var msg = "You stand around in the dark for a bit, hyperventilating. You take some time to think, look for a light, or take the door?";
+  }
+
+  twiml.message(msg)
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
 }
 
-function fStick(req, res){
+function fOutside_WindowOrDoor(req, res){
   var sFrom = req.body.From;
   var sAction = req.body.Body;
   var twiml = new twilio.twiml.MessagingResponse();
-  if(sAction.toLowerCase().search("eat") != -1){
-    oConnections[sFrom].fCurState = fStickOrHydrant;
-    twiml.message("Yum! Sticks are the best thing ever lot's of roughage. Wait .... Over there is that a stick or a fire hydrant?");
-  }else if(sAction.toLowerCase().search("take") != -1){
-    twiml.message("Please play with me. Do you throw the stick?");
-    oConnections[sFrom].fCurState = fPlay;
-  }else{
-    twiml.message("Wow! I've never done " + sAction + " before. Wait .... Over there is that a stick or a fire hydrant?")
-    oConnections[sFrom].fCurState = fStickOrHydrant;    
-  }
-  res.writeHead(200, {'Content-Type': 'text/xml'});
-  res.end(twiml.toString());
-}
-
-function fStickOrHydrant(req, res){
-  var sFrom = req.body.From;
-  var sAction = req.body.Body;
-  var twiml = new twilio.twiml.MessagingResponse();
-  if(sAction.toLowerCase().search("stick") != -1){
-    twiml.message("I love sticks.... Should I eat it or take it to my person so he will throw it?");
-    oConnections[sFrom].fCurState = fStick;
-  }else if(sAction.toLowerCase().search("hydrant") != -1){  
-    twiml.message("Pee mail! How exciting. Wait .... Over there is that a stick or a fire hydrant?");
+  if(sAction.toLowerCase().search("window") != -1){
+    twiml.message("You pull yourself up, through the window, but cut yourself on the glass. It's not too deep, but it stings. The house is dark. You find yourself in a living room. Do you fumble around around looking for a light, or look for a doorway?");
+    oConnections[sFrom].fBleedingStatus = true;
+    oConnections[sFrom].fCurState = fLivingRoom_LightOrDoorway;
+  }else if(sAction.toLowerCase().search("door") != -1){  
+    twiml.message("The door creaks loudly as you pull it open. You step inside. It is dark and the house smells of death. There is a door on your right. Take the door or go down the hall?");
+    oConnections[sFrom].fCurState = fFrontDoor_HallOrDoor;
   }else {
-    twiml.message("Wow! I've never seen " + sAction + " before. Wait .... Over there is that a stick or a fire hydrant?")
+    twiml.message("Alright, whatever, man. Go and do " + sAction + " if you want. But when you're done, window or door?")
   }
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
@@ -69,9 +66,9 @@ function fStickOrHydrant(req, res){
 
 function fBeginning(req, res){
   var sFrom = req.body.From;
-  oConnections[sFrom].fCurState = fStickOrHydrant;
+  oConnections[sFrom].fCurState = fOutside_WindowOrDoor;
   var twiml = new twilio.twiml.MessagingResponse();
-  twiml.message('Hi ... My name is Sheba. I am very enthusiastic about this game. Wait! Is that a stick or a fire hydrant?');
+  twiml.message('You see a dark and scary abandoned house. There is a broken window on the right side, by the corner. The door is slightly ajar. Do you take the window or use front door?');
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
 }
@@ -83,17 +80,6 @@ app.post('/sms', function(req, res) {
     oConnections[sFrom] = {"fCurState":fBeginning};
   }
   oConnections[sFrom].fCurState(req, res);
-});
-
-//define a method for the twilio web hook
-app.post('/sms', (req, res) => {
-  console.log(req.body);
-  const twiml = new MessagingResponse();
-
-  twiml.message('The Robots are coming! Head for the hills!');
-
-  res.writeHead(200, {'Content-Type': 'text/xml'});
-  res.end(twiml.toString());
 });
 
 // Listen for requests
