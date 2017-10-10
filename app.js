@@ -8,18 +8,19 @@ var oConnections = {};
 
 var defaultState = {
     // "fCurState": fBeginning,
-    "bleedingStatus": 0,
+    "bleedingStatus": 1,
     "hasRat": true,
-    "hasMushroom": false,
-    "hasSlime": false,
-    "hasAxe": false,
-    "hasCandle": false,
-    "hasRecipe": false,
+    "hasMushroom": true,
+    "hasSlime": true,
+    "hasAxe": true,
+    "hasCandle": true,
+    "hasRecipe": true,
     "isInvincible": false
 };
 
 //TODO - implement bleeding
 //TODO - implement more candle stuff
+//TODO - remove the rat/mushrooms when you take them...
 
 // Define the port to run on
 app.set('port', process.env.PORT || parseInt(process.argv.pop()) || 5100);
@@ -37,7 +38,7 @@ app.use(bodyParser.urlencoded({
 
 
 
-function fBedRoom(req, res) {
+function fEndGame(req, res) {
     var sFrom = req.body.From;
     var sAction = req.body.Body;
     var msg = "";
@@ -128,7 +129,7 @@ function fBedRoom(req, res) {
         msg += "Take a look at the pizza, the rat, or get out of here?";
     }
     else if (sAction.toLowerCase().search(/leave|out|exit|hall|door/) != -1) {
-        msg += "You head back into the hall.";
+        msg += "You head back into the hall. ";
         msg += "Do you check the living room, kitchen or the basement?";
         oConnections[sFrom].fCurState = fHallEnd;
     }
@@ -153,7 +154,7 @@ function fHallEnd(req, res) {
 
     if (sAction.toLowerCase().search("living") != -1) {
         //TODO - implement candle here...
-        msg += "The living room is full of junk.";
+        msg += "The living room is full of junk and the walls are grimy. ";
         if (oConnections[sFrom].hasRecipe && !oConnections[sFrom].hasSlime) {
             msg += " But oh, the slime on the walls could work for the potion maybe, you scoop some off. Ick.";
             oConnections[sFrom].hasSlime = true;
