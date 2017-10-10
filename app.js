@@ -45,11 +45,9 @@ function fEndGame(req, res) {
 
     if (sAction.toLowerCase().search(/drink|potion/) != -1) {
         msg += "The potion tastes fowl, but you feel the strength of a thousand men flow through your veins and know that right now, you are invincible. ";
-        if (oConnections[sFrom].hasAxe) {
-            msg += "Take out the axe and fight, or run like a coward?";
-        }
         oConnections[sFrom].isInvincible = true;
-        msg += "Run, or take the axe and fight?";
+        msg += oConnections[sFrom].hasAxe ? "Take out the axe " : "Stay ";
+        msg += "and fight, or run like a coward?";
     }
     else if (sAction.toLowerCase().search(/axe|fight/) != -1) {
         msg += "You drop the bowl to the floor with a clatter and ";
