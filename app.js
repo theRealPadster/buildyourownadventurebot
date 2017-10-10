@@ -44,7 +44,7 @@ function fEndGame(req, res) {
     var msg = "";
 
     if (sAction.toLowerCase().search(/drink|potion/) != -1) {
-        msg += "The potion tastes fowl, but you feel the strength of a thousand men flow through your veins and know that right now, you are invincible";
+        msg += "The potion tastes fowl, but you feel the strength of a thousand men flow through your veins and know that right now, you are invincible. ";
         if (oConnections[sFrom].hasAxe) {
             msg += "Take out the axe and fight, or run like a coward?";
         }
@@ -52,9 +52,15 @@ function fEndGame(req, res) {
         msg += "Run, or take the axe and fight?";
     }
     else if (sAction.toLowerCase().search(/axe|fight/) != -1) {
-        msg += "You drop the bowl to the floor with a clatter and pull out the axe. ";
-        msg += "The beast rounds the corner as you raise the axe above your head for a strike. ";
-        if (oConnections[sFrom].isInvincible) {
+        msg += "You drop the bowl to the floor with a clatter and ";
+        if (oConnections[sFrom].hasAxe) {
+            msg += "pull out the axe. The beast rounds the corner as you raise the axe above your head for a strike. ";
+        }
+        else {
+            msg += "realise you really should have taken that axe. ";
+        }
+
+        if (oConnections[sFrom].isInvincible && oConnections[sFrom].hasAxe) {
             msg += "Gaahrhgfushgsg!! It howls as you cleave its head in two. ";
             msg += "Now, feeling weak, as though the effort has sapped your strength, you head back outside. ";
             msg += "You have defeated the monster. You win. Now go have a nap. ";
@@ -180,7 +186,7 @@ function fHallEnd(req, res) {
             && oConnections[sFrom].hasSlime ) {
             msg += "You've got all the ingredients now, so you find a bowl and dump everything in. You light it with the candle and a LOUD pop sounds! ";
             msg += "The smoke clears and the bowl is now full of dark purple liquid.";
-            msg += "You head a gutteral, inhuman roar coming from the cellar, and claws scrabbling up the stairs. "
+            msg += "You hear a gutteral, inhuman roar coming from the cellar, and claws scrabbling up the stairs. "
             msg += "Something's coming! Drink it, "
             if (oConnections[sFrom].hasAxe) {
                 msg += "take the axe, "
