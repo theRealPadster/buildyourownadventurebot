@@ -6,21 +6,24 @@ var bodyParser = require('body-parser');
 var twilio = require('twilio');
 var oConnections = {};
 
+const TOO_SLOW_YOU_DIE = "Eeuuarrggghhfsefgggssss! You're just a wee bit too slow, and the monster claws your face off. You bleed out on the ground as it feasts upon your flesh. ";
+const LEAVE_LIVING_ROOM = "You're in the main hall. It's also dark and dusty. You head down the hall and hear a long shrill wail. There is a kitchen to your left, a bedroom to your right, and a long dark staircase downwards. Which do you choose?";
+const ENTER_BEDROOM = "The bedroom is gross. There's a pizza box with some fuzzy growth inside it and moth-eaten clothes strewn across the floor. And a dead rat in the corner. Look at the 'pizza', clothes, or the rat?";
+
 var defaultState = {
     // "fCurState": fBeginning,
-    "bleedingStatus": 1,
-    "hasRat": true,
-    "hasMushroom": true,
-    "hasSlime": true,
-    "hasAxe": true,
-    "hasCandle": true,
-    "hasRecipe": true,
+    "bleedingStatus": 0,
+    "hasRat": false,
+    "hasMushroom": false,
+    "hasSlime": false,
+    "hasAxe": false,
+    "hasCandle": false,
+    "hasRecipe": false,
     "isInvincible": false
 };
 
 //TODO - implement bleeding
 //TODO - implement more candle stuff
-//TODO - remove the rat/mushrooms when you take them...
 
 // Define the port to run on
 app.set('port', process.env.PORT || parseInt(process.argv.pop()) || 5100);
@@ -34,9 +37,10 @@ app.use(bodyParser.urlencoded({
     extended: true
 })); // for parsing application/x-www-form-urlencoded
 
-// msg += "You hear a noise coming from deep within the house. "
-
-
+function resetGame(sFrom) {
+    oConnections[sFrom] = JSON.parse(JSON.stringify(defaultState));
+    oConnections[sFrom].fCurState = fOutside;
+}
 
 function fEndGame(req, res) {
     var sFrom = req.body.From;
@@ -62,14 +66,11 @@ function fEndGame(req, res) {
             msg += "Gaahrhgfushgsg!! It howls as you cleave its head in two. ";
             msg += "Now, feeling weak, as though the effort has sapped your strength, you head back outside. ";
             msg += "You have defeated the monster. You win. Now go have a nap. ";
-            //TODO - reset game...
-            oConnections[sFrom].fCurState = fOutside;
+            resetGame(sFrom);
         }
         else {
-            //TODO - only once...3
-            msg += "Eeuuarrggghhfsefgggssss! You're just a wee bit too slow, and the monster claws your face off. You bleed out on the ground as it feasts upon your flesh. ";
-            //TODO - reset game...
-            oConnections[sFrom].fCurState = fOutside;
+            msg += TOO_SLOW_YOU_DIE;
+            resetGame(sFrom);
         }
     }
     else if (sAction.toLowerCase().search(/run|leave|exit|flee/) != -1) {
@@ -77,21 +78,16 @@ function fEndGame(req, res) {
             msg += "Gogogogogogogo! You book it through the old house and burst through the front door. The monster follows you and chases you down the street. ";
             msg += "Eventually you will tire, and then you will be eaten. The massacre of the town will be on your hands. ";
             msg += "Proud of yourself?";
-            //TODO - reset game...
-            oConnections[sFrom].fCurState = fOutside;
+            resetGame(sFrom);
         }
         else {
-            //TODO - only once...3
-            msg += "Eeuuarrggghhfsefgggssss! You're just a wee bit too slow, and the monster claws your face off. You bleed out on the ground as it feasts upon your flesh. ";
-            //TODO - reset game...
-            oConnections[sFrom].fCurState = fOutside;
+            msg += TOO_SLOW_YOU_DIE;
+            resetGame(sFrom);
         }
     }
     else {
-        //TODO - only once...3
-        msg += "Eeuuarrggghhfsefgggssss! You're just a wee bit too slow, and the monster claws your face off. You bleed out on the ground as it feasts upon your flesh. ";
-        //TODO - reset game...
-        oConnections[sFrom].fCurState = fOutside;
+        msg += TOO_SLOW_YOU_DIE;
+        resetGame(sFrom);
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
@@ -110,7 +106,7 @@ function fBedRoom(req, res) {
 
     if (sAction.toLowerCase().search(/pizza|food|growth|mold/) != -1) {
         msg += "You spy some spotted mushrooms in the moldy mess. ";
-        if (oConnections[sFrom].hasRecipe) {
+        if (oConnections[sFrom].hasRecipe && !oConnections[sFrom].hasMushroom) {
             msg += "Perfect. You pocket a few mushrooms for the potion.";
             oConnections[sFrom].hasMushroom = true;
         }
@@ -119,12 +115,17 @@ function fBedRoom(req, res) {
     }
     else if (sAction.toLowerCase().search("rat") != -1) {
         msg += "It's a rat long past his prime. Or his time at all. ";
-        if (oConnections[sFrom].hasRecipe) {
-            msg += "Perfect. You pocket the dead rat for the potion.";
-            oConnections[sFrom].hasRat = true;
+        if (!oConnections[sFrom].hasRat) {
+            if (oConnections[sFrom].hasRecipe) {
+                msg += "Perfect. You pocket the rat skull for the potion.";
+                oConnections[sFrom].hasRat = true;
+            }
+            else {
+                msg += "Why are you even looking? It looks dreadful, and not to mention the smell...";
+            }
         }
         else {
-            msg += "Why are you even looking? It looks dreadful, and not to mention the smell...";
+            msg += "You've removed the skull. You monster. ";
         }
         msg += "Take a look at the pizza, clothes, or get out of here?";
     }
@@ -138,9 +139,7 @@ function fBedRoom(req, res) {
         oConnections[sFrom].fCurState = fHallEnd;
     }
     else {
-        //TODO - just have this once...2
-        msg += "The bedroom is gross. There's a pizza box with some fuzzy growth inside it and moth-eaten clothes strewn across the floor. And a dead rat in the corner. ";
-        msg += "Look at the 'pizza', clothes, or the rat?";
+        msg += ENTER_BEDROOM;
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
@@ -195,7 +194,7 @@ function fHallEnd(req, res) {
         else {
             if (oConnections[sFrom].hasCandle) {
                 msg += "You hold out your candle and take a look. ";
-                msg += "It's a recipe for a potion! Calls for a dead rat, a mushroom, and some slime. ";
+                msg += "It's a recipe for a potion! Calls for a rat skull, a mushroom, and some slime. ";
                 oConnections[sFrom].hasRecipe = true;
             }
             else {
@@ -206,9 +205,7 @@ function fHallEnd(req, res) {
         }
     }
     else if (sAction.toLowerCase().search(/right||bed/) != -1) {
-        //TODO - just have this once...2
-        msg += "The bedroom is gross. There's a pizza box with some fuzzy growth inside it and moth-eaten clothes strewn across the floor. And a dead rat in the corner. ";
-        msg += "Look at the 'pizza', clothes, or the rat?";
+        msg += ENTER_BEDROOM;
         oConnections[sFrom].fCurState = fBedRoom;
     }
     else if (sAction.toLowerCase().search(/down|stair|basement|cellar/) != -1) {
@@ -245,19 +242,13 @@ function fLivingRoom(req, res) {
     } //leave living room (go to hall end)
     else if (sAction.toLowerCase().search(/door|leave|exit/) != -1) {
         msg += "You trip on some debris and stumble through the doorway. ";
-
-        //TODO - make this only once...1
-        msg += "You're in the main hall. It's also dark and dusty. You head down the hall and hear a long shrill wail. ";
-        msg += "There is a kitchen to your left, a bedroom to your right, and a long dark staircase downwards. Which do you choose?";
+        msg += LEAVE_LIVING_ROOM;
         oConnections[sFrom].fCurState = fHallEnd;
     } //take axe
     else if (sAction.toLowerCase().search(/take|axe/) != -1) {
         msg += "You take the axe. It's hefty in your hands and has a little blood on the blade.";
         msg += "You then head out the doorway, axe in hand.";
-
-        //TODO - make this only once...1
-        msg += "You're in the main hall. It's also dark and dusty. You head down the hall and hear a long shrill wail. ";
-        msg += "There is a kitchen to your left, a bedroom to your right, and a long dark staircase downwards. Which do you choose?";
+        msg += LEAVE_LIVING_ROOM;
         oConnections[sFrom].hasAxe = true;
         oConnections[sFrom].fCurState = fHallEnd;
     } else {
@@ -288,7 +279,7 @@ function fOutside(req, res) {
         oConnections[sFrom].fCurState = fHallEnd;
     } //first time here, or invalid
     else {
-        msg = "You see a dark and scary abandoned house. There is a broken window on the right side, by the corner. The door is slightly ajar. Do you take the window or use front door?";
+        msg = "You see a dark and scary abandoned house. There is a broken window on the right side, by the corner. The door is slightly ajar. Do you take the window or use front door? (You can also type 'status' to see your inventory at any time, just resume for the previous message afterwards)";
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
@@ -304,8 +295,7 @@ app.post('/sms', function(req, res) {
     var sFrom = req.body.From;
     console.log("hit, sFrom:" + sFrom);
     if (!oConnections.hasOwnProperty(sFrom)) {
-        oConnections[sFrom] = JSON.parse(JSON.stringify(defaultState));
-        oConnections[sFrom].fCurState = fOutside;
+        resetGame(sFrom);
     }
 
     var sAction = req.body.Body;
@@ -326,6 +316,9 @@ app.post('/sms', function(req, res) {
         }
         if (oConnections[sFrom].hasAxe) {
             status += "- an axe\n";
+        }
+        if (oConnections[sFrom].hasRecipe) {
+            status += "- a potion recipe memorised (rat skull, mushroom, slime)\n";
         }
         if (oConnections[sFrom].bleedingStatus > 0) {
             status += "oh, and you're bleeding\n";
