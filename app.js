@@ -156,7 +156,9 @@ function fHallEnd(req, res) {
     var msg = "";
 
     if (sAction.toLowerCase().search("living") != -1) {
-        //TODO - implement candle here...
+        //TODO - implement candle better, and in other rooms?...
+        msg += "You see a candle and some matches. There is a bright flare as you light it up. ";
+        oConnections[sFrom].hasCandle = true;
         msg += "The living room is full of junk and the walls are grimy. ";
         if (oConnections[sFrom].hasRecipe && !oConnections[sFrom].hasSlime) {
             msg += " But oh, the slime on the walls could work for the potion maybe, you scoop some off. Ick.";
