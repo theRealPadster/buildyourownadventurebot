@@ -7,7 +7,7 @@ var twilio = require('twilio');
 var oConnections = {};
 
 const TOO_SLOW_YOU_DIE = "Eeuuarrggghhfsefgggssss! You're just a wee bit too slow, and the monster claws your face off. You bleed out on the ground as it feasts upon your flesh. ";
-const LEAVE_LIVING_ROOM = "You're in the main hall. It's also dark and dusty. You head down the hall and hear a long shrill wail. There is a kitchen to your left, a bedroom to your right, and a long dark staircase downwards. Which do you choose?";
+const IN_THE_HALL = "You're in the main hall. It's also dark and dusty. You head down the hall and hear a long shrill wail. There is a kitchen to your left, a bedroom to your right, a living room, and a long dark staircase downwards. Which do you choose?";
 const ENTER_BEDROOM = "The bedroom is gross. There's a pizza box with some fuzzy growth inside it and moth-eaten clothes strewn across the floor. And a dead rat in the corner. Look at the 'pizza', clothes, or the rat?";
 
 var defaultState = {
@@ -135,12 +135,11 @@ function fBedRoom(req, res) {
     }
     else if (sAction.toLowerCase().search(/leave|out|exit|hall|door/) != -1) {
         msg += "You head back into the hall. ";
-        msg += "Do you check the living room, kitchen or the basement?(1)";
+        msg += "Do you check the living room, kitchen or the basement?";
         oConnections[sFrom].fCurState = fHallEnd;
     }
-    else { //TODO - this gets hit too often...?
+    else {
         msg += ENTER_BEDROOM;
-        msg += "eeey?";
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
@@ -205,19 +204,19 @@ function fHallEnd(req, res) {
                 msg += " You can't make it out in the dark. You need a light. ";
             }
             msg += "You head back into the hall. ";
-            msg += "Do you check the living room, bedroom or the basement(2)?";
+            msg += "Do you check the living room, bedroom or the basement?";
         }
     }
     else if (sAction.toLowerCase().search(/right|bed/) != -1) {
         msg += ENTER_BEDROOM;
         oConnections[sFrom].fCurState = fBedRoom;
-    } //TODO - basement doesn't work?
+    }
     else if (sAction.toLowerCase().search(/down|stair|basement|cellar/) != -1) {
         msg += "With a great roar, a massive hairy beast lurches from the shadows and devours your entire being in one bite! Welp. GG. ";
         resetGame(sFrom);
     }
     else {
-        msg += "TODO - hmm...";
+        msg += IN_THE_HALL;
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
@@ -246,13 +245,13 @@ function fLivingRoom(req, res) {
     } //leave living room (go to hall end)
     else if (sAction.toLowerCase().search(/door|leave|exit|go|out/) != -1) {
         msg += "You trip on some debris and stumble through the doorway. ";
-        msg += LEAVE_LIVING_ROOM;
+        msg += IN_THE_HALL;
         oConnections[sFrom].fCurState = fHallEnd;
     } //take axe
     else if (sAction.toLowerCase().search(/take|axe/) != -1) {
         msg += "You take the axe. It's hefty in your hands and has a little blood on the blade.";
         msg += "You then head out the doorway, axe in hand.";
-        msg += LEAVE_LIVING_ROOM;
+        msg += IN_THE_HALL;
         oConnections[sFrom].hasAxe = true;
         oConnections[sFrom].fCurState = fHallEnd;
     } else {
