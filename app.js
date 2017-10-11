@@ -208,7 +208,7 @@ function fHallEnd(req, res) {
             msg += "Do you check the living room, bedroom or the basement(2)?";
         }
     }
-    else if (sAction.toLowerCase().search(/right||bed/) != -1) {
+    else if (sAction.toLowerCase().search(/right|bed/) != -1) {
         msg += ENTER_BEDROOM;
         oConnections[sFrom].fCurState = fBedRoom;
     } //TODO - basement doesn't work?
