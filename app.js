@@ -157,14 +157,15 @@ function fHallEnd(req, res) {
 
     if (sAction.toLowerCase().search("living") != -1) {
         //TODO - implement candle better, and in other rooms?...
-        msg += "You see a candle and some matches. There is a bright flare as you light it up. ";
-        oConnections[sFrom].hasCandle = true;
+        if (!oConnections[sFrom].hasCandle) {
+            msg += "You see a candle and some matches. There is a bright flare as you light it up. ";
+            oConnections[sFrom].hasCandle = true;
+        }
         msg += "The living room is full of junk and the walls are grimy. ";
         if (oConnections[sFrom].hasRecipe && !oConnections[sFrom].hasSlime) {
             msg += " But oh, the slime on the walls could work for the potion maybe, you scoop some off. Ick.";
             oConnections[sFrom].hasSlime = true;
         }
-
         if (!oConnections[sFrom].hasAxe) {
             msg += "There is an axe on the table. Take the axe or just leave?";
             oConnections[sFrom].fCurState = fLivingRoom;
@@ -212,7 +213,7 @@ function fHallEnd(req, res) {
     }
     else if (sAction.toLowerCase().search(/down|stair|basement|cellar/) != -1) {
         msg += "With a great roar, a massive hairy beast lurches from the shadows and devours your entire being in one bite! Welp. GG. ";
-        oConnections[sFrom].fCurState = fOutside;
+        resetGame(sFrom);
     }
     else {
 
