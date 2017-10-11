@@ -135,11 +135,12 @@ function fBedRoom(req, res) {
     }
     else if (sAction.toLowerCase().search(/leave|out|exit|hall|door/) != -1) {
         msg += "You head back into the hall. ";
-        msg += "Do you check the living room, kitchen or the basement?";
+        msg += "Do you check the living room, kitchen or the basement?(1)";
         oConnections[sFrom].fCurState = fHallEnd;
     }
     else { //TODO - this gets hit too often...?
         msg += ENTER_BEDROOM;
+        msg += "eeey?";
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
@@ -204,7 +205,7 @@ function fHallEnd(req, res) {
                 msg += " You can't make it out in the dark. You need a light. ";
             }
             msg += "You head back into the hall. ";
-            msg += "Do you check the living room, bedroom or the basement?";
+            msg += "Do you check the living room, bedroom or the basement(2)?";
         }
     }
     else if (sAction.toLowerCase().search(/right||bed/) != -1) {
@@ -216,7 +217,7 @@ function fHallEnd(req, res) {
         resetGame(sFrom);
     }
     else {
-
+        msg += "TODO - hmm...";
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
@@ -243,7 +244,7 @@ function fLivingRoom(req, res) {
         msg += "The first thing you notice is all the dust everywhere. Then you see an axe, just sitting there on the coffee table. Do you take it, or just leave?";
         oConnections[sFrom].hasCandle = true;
     } //leave living room (go to hall end)
-    else if (sAction.toLowerCase().search(/door|leave|exit/) != -1) {
+    else if (sAction.toLowerCase().search(/door|leave|exit|go|out/) != -1) {
         msg += "You trip on some debris and stumble through the doorway. ";
         msg += LEAVE_LIVING_ROOM;
         oConnections[sFrom].fCurState = fHallEnd;
@@ -255,7 +256,7 @@ function fLivingRoom(req, res) {
         oConnections[sFrom].hasAxe = true;
         oConnections[sFrom].fCurState = fHallEnd;
     } else {
-        var msg = "You stand around in the dark for a bit, hyperventilating. You take some time to think, look for a light, or take the door?";
+        var msg = "You stand around in the dark for a bit, hyperventilating. You take some time to think, what do you do?";
     }
 
     var twiml = new twilio.twiml.MessagingResponse();
