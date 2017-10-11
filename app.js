@@ -77,7 +77,7 @@ function fEndGame(req, res) {
         if (oConnections[sFrom].isInvincible) {
             msg += "Gogogogogogogo! You book it through the old house and burst through the front door. The monster follows you and chases you down the street. ";
             msg += "Eventually you will tire, and then you will be eaten. The massacre of the town will be on your hands. ";
-            msg += "Proud of yourself?";
+            msg += "I hope you're proud of yourself.";
             resetGame(sFrom);
         }
         else {
@@ -171,7 +171,7 @@ function fHallEnd(req, res) {
             oConnections[sFrom].fCurState = fLivingRoom;
         }
         else {
-            msg += "Nothing much left here, so you head back into the hall.";
+            msg += "Nothing much left here, so you head back into the hall. ";
             msg += "Head to the kitchen, bedroom, or stairs?";
         }
     }
@@ -189,7 +189,7 @@ function fHallEnd(req, res) {
             msg += "You hear a gutteral, inhuman roar coming from the cellar, and claws scrabbling up the stairs. "
             msg += "Something's coming! Drink it, "
             if (oConnections[sFrom].hasAxe) {
-                msg += "take the axe, "
+                msg += "take out the axe, "
             }
             msg += "or run?";
             oConnections[sFrom].fCurState = fEndGame;
@@ -302,9 +302,9 @@ app.post('/sms', function(req, res) {
     }
 
     var sAction = req.body.Body;
-    var status = "";
+
     if (sAction.toLowerCase().search("status") != -1) {
-        status += "You have: \n"
+        var status = "You have: \n";
         if (oConnections[sFrom].hasCandle) {
             status += "- a candle\n";
         }
@@ -323,8 +323,9 @@ app.post('/sms', function(req, res) {
         if (oConnections[sFrom].hasRecipe) {
             status += "- a potion recipe memorised (rat skull, mushroom, slime)\n";
         }
+        status += "- a deep fear twisting in your gut";
         if (oConnections[sFrom].bleedingStatus > 0) {
-            status += "oh, and you're bleeding\n";
+            status += "...oh, and you're bleeding\n";
         }
 
         status += "Now just resume where you left off..."
