@@ -138,7 +138,7 @@ function fBedRoom(req, res) {
         msg += "Do you check the living room, kitchen or the basement?";
         oConnections[sFrom].fCurState = fHallEnd;
     }
-    else {
+    else { //TODO - this gets hit too often...?
         msg += ENTER_BEDROOM;
     }
 
@@ -210,7 +210,7 @@ function fHallEnd(req, res) {
     else if (sAction.toLowerCase().search(/right||bed/) != -1) {
         msg += ENTER_BEDROOM;
         oConnections[sFrom].fCurState = fBedRoom;
-    }
+    } //TODO - basement doesn't work?
     else if (sAction.toLowerCase().search(/down|stair|basement|cellar/) != -1) {
         msg += "With a great roar, a massive hairy beast lurches from the shadows and devours your entire being in one bite! Welp. GG. ";
         resetGame(sFrom);
